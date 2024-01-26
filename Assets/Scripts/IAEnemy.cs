@@ -47,7 +47,10 @@ public class IAEnemy : MonoBehaviour
 
     void Patrol()
     {
-
+        if(enemyAgent.remainingDistance <0.5f)
+        {
+            SetRandomPoint();
+        }
     }
 
     void Chase()
