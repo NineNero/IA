@@ -63,4 +63,10 @@ public class IAEnemy : MonoBehaviour
 
         enemyAgent.destination = randomPoint;
     }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireCube(patrolAreaCenter.position, new Vector3(patrolAreaSize.x, 0, patrolAreaSize.y));
+    }
 }
