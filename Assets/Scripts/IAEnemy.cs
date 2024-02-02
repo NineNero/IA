@@ -8,7 +8,8 @@ public class IAEnemy : MonoBehaviour
     enum State
     {
         Patrolling,
-        Chasing
+        Chasing,
+        Searching
     }
 
     State currentState;
@@ -21,6 +22,12 @@ public class IAEnemy : MonoBehaviour
     
     [SerializeField] float visionRange = 15;
     [SerializeField] float visionAngle = 90;
+
+    Vector3 lastTargetPosition;
+
+    [SerializeField] float searchTimer;
+    [SerializeField] float searchWaitTime = 15;
+    [SerializeField] float searchRadius = 30;
 
     void Awake()
     {
@@ -45,6 +52,9 @@ public class IAEnemy : MonoBehaviour
             case State.Chasing:
                 Chase();
             break;
+            case State.Searching:
+                Search();
+            break;
         }
     }
 
@@ -66,6 +76,34 @@ public class IAEnemy : MonoBehaviour
         enemyAgent.destination = playerTransform.position;
 
         if(OnRange() == false)
+        {
+            searchTimer = 0;
+            currentState = State.Searching;
+        }
+    }
+
+    void Search()
+    {
+        if(OnRange() == true)
+        {
+            currentState = State.Chasing;
+        }
+
+        searchTimer += Time.deltaTime;
+
+        if(searchTimer < searchWaitTime)
+        {
+            if(enemyAgent.remainingDistance < 0.5f)
+            {
+            Debug.Log("Buscando punto aleatorio");
+
+            Vector3 randomSearchPoint = lastTargetPosition + Random.insideUnitSphere * searchRadius;
+            randomSearchPoint.y = lastTargetPosition.y;
+            enemyAgent.destination = randomSearchPoint;
+            }
+        }
+
+        else
         {
             currentState = State.Patrolling;
         }
@@ -96,7 +134,23 @@ public class IAEnemy : MonoBehaviour
 
         if(distanceToPlayer <= visionRange && angleToPlayer < visionAngle * 0.5f)
         {
-            return true;
+            if(playerTransform.position == lastTargetPosition)
+            {
+                return true;
+            }
+
+            RaycastHit hit;
+            if(Physics.Raycast(transform.position, directionToPlayer, out hit, distanceToPlayer))
+            {
+                if(hit.collider.CompareTag("Player"))
+                {
+                    lastTargetPosition = playerTransform.position;
+                    
+                    return true;
+                }
+            }
+
+            return false;
         }
         
         return false;
