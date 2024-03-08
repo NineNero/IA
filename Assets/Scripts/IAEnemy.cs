@@ -14,7 +14,7 @@ public class IAEnemy : MonoBehaviour
         Attacking
     }
 
-    State currentState;
+    [SerializeField] State currentState;
 
     NavMeshAgent enemyAgent;
     Transform playerTransform;
@@ -34,6 +34,9 @@ public class IAEnemy : MonoBehaviour
     [SerializeField] float searchTimer;
     [SerializeField] float searchWaitTime = 15;
     [SerializeField] float searchRadius = 30;
+
+    [SerializeField] float waitTimer;
+    float waitTime = 5;
 
     void Awake()
     {
@@ -81,7 +84,8 @@ public class IAEnemy : MonoBehaviour
         if(enemyAgent.remainingDistance <0.5f)
         {
             //SetRandomPoint();
-            SetNextPatrolPoint();
+            //SetNextPatrolPoint();
+            currentState = State.Waiting;
         }
     }
 
@@ -130,7 +134,14 @@ public class IAEnemy : MonoBehaviour
 
     void Wait()
     {
-        
+        waitTimer += Time.deltaTime;
+
+        if(waitTimer > waitTime)
+        {
+            SetNextPatrolPoint();
+            currentState = State.Patrolling;
+            waitTimer = 0;
+        }
     }
 
     void Attack()
